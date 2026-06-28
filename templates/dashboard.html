@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Orders — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+      <span class="nav-logo-text">{{ bakery_name }}</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/menu">Menu</a></li>
+      <li><a href="/order">New Order</a></li>
+      <li><a href="/dashboard" class="active">My Orders</a></li>
+    </ul>
+    <a href="/logout" class="btn btn-outline nav-cta">Log Out</a>
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  </nav>
+
+  <div class="dashboard-page">
+    <div class="container">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}" style="margin-bottom:1.5rem">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <div class="dashboard-header">
+        <h1>Welcome, <em>{{ user.name.split()[0] }}</em> 🎂</h1>
+        <p>Here you can view all your orders and track their progress.</p>
+      </div>
+
+      {% if next_discount_pct > 0 or birthday_active %}
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem">
+        {% if next_discount_pct > 0 %}
+        <div class="flash flash-success" style="flex:1;min-width:240px;margin-bottom:0">
+          🎉 Your next order qualifies for <strong>{{ next_discount_pct }}% off!</strong>
+        </div>
+        {% endif %}
+        {% if birthday_active %}
+        <div class="flash flash-success" style="flex:1;min-width:240px;margin-bottom:0">
+          🎂 Happy Birthday month! Get <strong>R{{ birthday_voucher_amount }} off</strong> a celebration cake.
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="dashboard-grid">
+
+        <!-- SIDEBAR -->
+        <div class="dash-sidebar">
+          <div class="dash-user-name">{{ user.name }}</div>
+          <div class="dash-user-email">{{ user.email }}</div>
+          <div style="font-family:var(--font-ui);font-size:0.78rem;color:var(--gold);margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)">
+            Order #{{ next_order_number }} coming up
+          </div>
+          <ul class="dash-nav">
+            <li><a href="/dashboard" class="active">📋 My Orders</a></li>
+            <li><a href="/order">🎂 Place New Order</a></li>
+            <li><a href="/menu">🍰 View Menu</a></li>
+            <li><a href="https://wa.me/{{ whatsapp }}" target="_blank">💬 WhatsApp Us</a></li>
+            <li><a href="/logout" style="color:#e07070">🚪 Log Out</a></li>
+          </ul>
+        </div>
+
+        <!-- ORDERS -->
+        <div class="orders-section">
+          <div class="orders-header">
+            <h2>My Orders ({{ orders|length }})</h2>
+            <a href="/order" class="btn btn-gold" style="padding:0.7rem 1.6rem">+ New Order</a>
+          </div>
+
+          {% if orders %}
+            {% for o in orders %}
+            <div class="order-card">
+              <div class="order-card-top">
+                <div>
+                  <div class="order-card-title">
+                    {% if o.product == 'cake_in_cup' %}☕ Cake in a Cup
+                    {% elif o.product == 'cupcakes' %}🧁 Cupcakes
+                    {% elif o.product == 'scones' %}🥐 Scones
+                    {% else %}🎂 Celebration Cake{% endif %}
+                  </div>
+                  <div class="order-card-date">Ordered on {{ o.created_at[:10] }}</div>
+                </div>
+                <!-- Status badge — class matches CSS e.g. status-In-Progress -->
+                <span class="status-badge status-{{ o.status.replace(' ','-') }}">{{ o.status }}</span>
+              </div>
+
+              <div class="order-card-body">
+                <div class="order-detail">
+                  <span class="order-detail-label">Details</span>
+                  <span class="order-detail-value">{{ o.details or '—' }}</span>
+                </div>
+                <div class="order-detail">
+                  <span class="order-detail-label">Flavour</span>
+                  <span class="order-detail-value">{{ o.flavour or '—' }}</span>
+                </div>
+                {% if o.custom_flavour_detail %}
+                <div class="order-detail">
+                  <span class="order-detail-label">Custom Flavour</span>
+                  <span class="order-detail-value">{{ o.custom_flavour_detail }}</span>
+                </div>
+                {% endif %}
+                <div class="order-detail">
+                  <span class="order-detail-label">Event Date</span>
+                  <span class="order-detail-value">{{ o.event_date or '—' }}</span>
+                </div>
+                {% if o.custom_request %}
+                <div class="order-detail">
+                  <span class="order-detail-label">Custom Request</span>
+                  <span class="order-detail-value">{{ o.custom_request }}</span>
+                </div>
+                {% endif %}
+                {% if o.is_rush %}
+                <div class="order-detail">
+                  <span class="order-detail-label">Rush Order</span>
+                  <span class="order-detail-value" style="color:#e07070">⚠️ Yes</span>
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="order-card-footer">
+                <div>
+                  <div class="order-total">Total: R{{ "%.2f"|format(o.total) }}</div>
+                  <div class="order-deposit">50% Deposit: R{{ "%.2f"|format(o.deposit) }}</div>
+                  {% if o.discount_amount and o.discount_amount > 0 %}
+                  <div class="order-deposit" style="color:#7ee787">🎉 {{ o.discount_pct|int }}% Off Applied: -R{{ "%.2f"|format(o.discount_amount) }}</div>
+                  {% endif %}
+                  {% if o.birthday_voucher_used and o.birthday_voucher_used > 0 %}
+                  <div class="order-deposit" style="color:#7ee787">🎂 Birthday Voucher: -R{{ "%.2f"|format(o.birthday_voucher_used) }}</div>
+                  {% endif %}
+                </div>
+                <a href="https://wa.me/{{ whatsapp }}?text=Hi! I'd like to enquire about my order placed on {{ o.created_at[:10] }}."
+                   target="_blank" class="btn btn-whatsapp" style="padding:0.6rem 1.2rem;font-size:0.72rem">
+                  💬 Enquire
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+
+          {% else %}
+            <div class="empty-orders">
+              <div style="font-size:3rem;margin-bottom:1rem">🎂</div>
+              <p>You haven't placed any orders yet.<br>Let's change that!</p>
+              <a href="/order" class="btn btn-gold">Place Your First Order</a>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo"><img src="/static/logo.PNG" alt="{{ bakery_name }}" /><span class="nav-logo-text">{{ bakery_name }}</span></div>
+          <p>Handcrafted celebration cakes made with love and luxury ingredients.</p>
+        </div>
+        <div class="footer-col"><h4>Navigate</h4><ul><li><a href="/">Home</a></li><li><a href="/menu">Menu</a></li><li><a href="/order">Order</a></li><li><a href="/terms">Terms &amp; Conditions</a></li></ul></div>
+        <div class="footer-col"><h4>Connect</h4><ul><li><a href="https://wa.me/{{ whatsapp }}" target="_blank">WhatsApp</a></li><li><a href="{{ tiktok }}" target="_blank">TikTok</a></li><li><a href="tel:{{ phone }}">{{ phone }}</a></li></ul></div>
+      </div>
+      <div class="footer-bottom"><span>© 2025 <span class="gold-accent">{{ bakery_name }}</span>.</span><span>Crafted with <span class="gold-accent">♥</span></span></div>
+    </div>
+  </footer>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

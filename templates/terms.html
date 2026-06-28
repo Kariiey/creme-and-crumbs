@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms &amp; Conditions — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="/static/logo.PNG" type="image/PNG" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+      <span class="nav-logo-text">{{ bakery_name }}</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/menu">Menu</a></li>
+      <li><a href="/order">Order</a></li>
+      <li><a href="/terms" class="active">Terms</a></li>
+      {% if user %}<li><a href="/dashboard">My Orders</a></li>{% endif %}
+    </ul>
+    {% if user %}
+    <a href="/dashboard" class="btn btn-gold nav-cta">My Orders</a>
+    {% else %}
+    <a href="/order" class="btn btn-gold nav-cta">Place Order</a>
+    {% endif %}
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  </nav>
+
+  <!-- ===== TERMS HERO ===== -->
+  <div class="menu-hero">
+    <span class="section-eyebrow">{{ bakery_name }}</span>
+    <h1 style="font-size:clamp(2.2rem,6vw,4rem);color:var(--white);font-weight:300">
+      Terms &amp; <em style="color:var(--gold);font-style:italic">Conditions</em>
+    </h1>
+    <div class="gold-rule" style="max-width:300px;margin:1.5rem auto"><span>✦</span></div>
+    <p style="font-family:var(--font-ui);color:var(--white-dim);font-size:0.9rem;max-width:520px;margin:0 auto">
+      Please read these terms carefully before placing your order. By ordering with us, you agree to the policies below.
+    </p>
+  </div>
+
+  <!-- ===== TERMS CONTENT ===== -->
+  <section class="section">
+    <div class="container" style="max-width:820px">
+
+      <!-- 1. Orders -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">01</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Orders</h2>
+        <ul class="terms-list">
+          <li>Orders must be placed <strong>14 days in advance</strong>.</li>
+          <li>A detailed brief (flavour, size, colour, etc.) must be provided to ensure accurate results.</li>
+        </ul>
+      </div>
+
+      <!-- 2. Payments -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">02</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Payments</h2>
+        <ul class="terms-list">
+          <li>A <strong>non-refundable deposit of 50%</strong> is required to confirm your order.</li>
+          <li>The remaining balance is due before the order leaves our premises.</li>
+        </ul>
+      </div>
+
+      <!-- 3. Cancellations and Refunds -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">03</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Cancellations &amp; Refunds</h2>
+        <ul class="terms-list">
+          <li>Cancellations made 3 days after an order was placed may be eligible for a partial refund.</li>
+          <li>Cancellations made within 24 hours of collection will <strong>not</strong> be refunded.</li>
+          <li>Refunds will not be issued for dissatisfaction on design preferences if the cake matches the agreed brief.</li>
+        </ul>
+      </div>
+
+      <!-- 4. Collection -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">04</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Collection</h2>
+        <ul class="terms-list">
+          <li>Cakes must be collected at an agreed time. Late arrivals may affect other scheduled orders.</li>
+          <li>Customers who do not abide by the agreed time will be charged an extra fee.</li>
+          <li>Once the cake is collected, we are not responsible for any damages.</li>
+        </ul>
+      </div>
+
+      <!-- 5. Storage and Shelf Life -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">05</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Storage &amp; Shelf Life</h2>
+        <ul class="terms-list">
+          <li>Cakes should be kept in a cool, dry place.</li>
+          <li>Best consumed within <strong>3–5 days</strong> of collection.</li>
+        </ul>
+      </div>
+
+      <!-- 6. Changes to Orders -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">06</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Changes to Orders</h2>
+        <ul class="terms-list">
+          <li>Minor changes may be made up to <strong>5 days</strong> before the collection date.</li>
+          <li>Major changes may affect the final price and availability.</li>
+        </ul>
+      </div>
+
+      <!-- 7. Liability -->
+      <div class="menu-section reveal">
+        <p class="menu-category-label">07</p>
+        <h2 class="menu-category-title" style="font-size:1.7rem">Liability</h2>
+        <ul class="terms-list">
+          <li>We are not liable for any damage after collection.</li>
+          <li>If a problem occurs with your order, please contact us within <strong>24 hours</strong> so we can assess and resolve the issue where possible.</li>
+        </ul>
+      </div>
+
+      <!-- Contact CTA -->
+      <div class="reveal" style="text-align:center;padding:3rem 0 1rem">
+        <p style="font-family:var(--font-ui);font-size:0.85rem;color:var(--white-dim);margin-bottom:1.5rem">
+          Questions about these terms? We're happy to help.
+        </p>
+        <a href="https://wa.me/{{ whatsapp }}" target="_blank" class="btn btn-whatsapp">
+          💬 Ask Us on WhatsApp
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo"><img src="/static/logo.PNG" alt="{{ bakery_name }}" /><span class="nav-logo-text">{{ bakery_name }}</span></div>
+          <p>Handcrafted celebration cakes made with love and luxury ingredients.</p>
+        </div>
+        <div class="footer-col"><h4>Navigate</h4><ul><li><a href="/">Home</a></li><li><a href="/menu">Menu</a></li><li><a href="/order">Order</a></li><li><a href="/terms">Terms &amp; Conditions</a></li></ul></div>
+        <div class="footer-col"><h4>Connect</h4><ul><li><a href="https://wa.me/{{ whatsapp }}" target="_blank">WhatsApp</a></li><li><a href="{{ tiktok }}" target="_blank">TikTok</a></li><li><a href="tel:{{ phone }}">{{ phone }}</a></li></ul></div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 <span class="gold-accent">{{ bakery_name }}</span>.</span><span>Crafted with <span class="gold-accent">♥</span></span></div>
+    </div>
+  </footer>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sign Up — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+        <div class="auth-logo-name">{{ bakery_name }}</div>
+      </div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join us to place and track your cake orders</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/signup">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="Your full name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+27 XX XXX XXXX" required />
+        </div>
+        <div class="form-group">
+          <label for="birth_date">Birth Date</label>
+          <input type="date" id="birth_date" name="birth_date" required />
+          <small style="font-family:var(--font-ui);color:var(--gold);font-size:0.75rem;margin-top:0.4rem;display:block">
+            🎂 We'll send you a R50 voucher for your cake order during your birthday month!
+          </small>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="At least 6 characters" required />
+        </div>
+        <div class="form-group">
+          <label for="confirm">Confirm Password</label>
+          <input type="password" id="confirm" name="confirm" placeholder="Repeat your password" required />
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:1.1rem;margin-top:0.5rem">
+          Create My Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login">Log in here</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

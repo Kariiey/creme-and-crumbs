@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Panel — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body style="background:var(--black-soft)">
+
+  <div class="admin-page">
+    <div class="admin-header">
+      <h1>🎂 {{ bakery_name }} — Admin Panel</h1>
+      <div style="display:flex;gap:1rem;align-items:center">
+        <span style="font-family:var(--font-ui);font-size:0.82rem;color:var(--white-dim)">{{ orders|length }} total orders</span>
+        <a href="/admin/logout" class="btn btn-outline" style="padding:0.5rem 1.2rem;font-size:0.72rem">Log Out</a>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    {% set pending   = orders|selectattr('status','equalto','Pending')|list %}
+    {% set confirmed = orders|selectattr('status','equalto','Confirmed')|list %}
+    {% set inprog    = orders|selectattr('status','equalto','In Progress')|list %}
+    {% set completed = orders|selectattr('status','equalto','Completed')|list %}
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem">
+      <div style="background:var(--black-card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center">
+        <div style="font-size:1.6rem;font-weight:700;color:var(--gold)">{{ pending|length }}</div>
+        <div style="font-family:var(--font-ui);font-size:0.72rem;color:var(--white-dim);text-transform:uppercase;letter-spacing:0.1em">Pending</div>
+      </div>
+      <div style="background:var(--black-card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center">
+        <div style="font-size:1.6rem;font-weight:700;color:#7ee787">{{ confirmed|length }}</div>
+        <div style="font-family:var(--font-ui);font-size:0.72rem;color:var(--white-dim);text-transform:uppercase;letter-spacing:0.1em">Confirmed</div>
+      </div>
+      <div style="background:var(--black-card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center">
+        <div style="font-size:1.6rem;font-weight:700;color:#79c0ff">{{ inprog|length }}</div>
+        <div style="font-family:var(--font-ui);font-size:0.72rem;color:var(--white-dim);text-transform:uppercase;letter-spacing:0.1em">In Progress</div>
+      </div>
+      <div style="background:var(--black-card);border:1px solid var(--border);padding:1.2rem 2rem;flex:1;min-width:120px;text-align:center">
+        <div style="font-size:1.6rem;font-weight:700;color:#aaa">{{ completed|length }}</div>
+        <div style="font-family:var(--font-ui);font-size:0.72rem;color:var(--white-dim);text-transform:uppercase;letter-spacing:0.1em">Completed</div>
+      </div>
+    </div>
+
+    <!-- Reset Customer Password Tool -->
+    <div style="background:var(--black-card);border:1px solid var(--border);padding:1.5rem 2rem;margin-bottom:2rem">
+      <p style="font-family:var(--font-ui);font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">
+        🔑 Reset a Customer's Password
+      </p>
+      <p style="font-family:var(--font-ui);font-size:0.78rem;color:var(--white-dim);margin-bottom:1rem">
+        When a customer WhatsApps you saying they forgot their password, enter their email and a new password here.
+      </p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:200px">
+          <label style="font-family:var(--font-ui);font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.4rem">Customer Email</label>
+          <input type="email" id="reset_email" placeholder="customer@email.com"
+            style="width:100%;background:var(--black-soft);border:1px solid var(--border);color:var(--white);font-family:var(--font-ui);font-size:0.85rem;padding:0.7rem 1rem" />
+        </div>
+        <div style="flex:1;min-width:200px">
+          <label style="font-family:var(--font-ui);font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.4rem">New Password</label>
+          <input type="text" id="reset_new_password" placeholder="At least 6 characters"
+            style="width:100%;background:var(--black-soft);border:1px solid var(--border);color:var(--white);font-family:var(--font-ui);font-size:0.85rem;padding:0.7rem 1rem" />
+        </div>
+        <button onclick="resetCustomerPassword()" class="btn btn-gold" style="padding:0.7rem 1.6rem">Reset Password</button>
+      </div>
+      <p id="reset_result" style="font-family:var(--font-ui);font-size:0.82rem;margin-top:1rem"></p>
+    </div>
+
+    {% if orders %}
+    <div style="overflow-x:auto">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Product</th>
+            <th>Details</th>
+            <th>Flavour</th>
+            <th>Event Date</th>
+            <th>Total</th>
+            <th>Deposit</th>
+            <th>Rush</th>
+            <th>Ordered</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td style="color:var(--gold)">{{ o.id }}</td>
+            <td style="color:var(--white)">{{ o.customer_name }}</td>
+            <td>
+              <div>{{ o.email }}</div>
+              <div>{{ o.phone }}</div>
+            </td>
+            <td style="color:var(--white)">
+              {% if o.product == 'cake_in_cup' %}☕ Cake in a Cup
+              {% elif o.product == 'cupcakes' %}🧁 Cupcakes
+              {% elif o.product == 'scones' %}🥐 Scones
+              {% else %}🎂 Cake{% endif %}
+            </td>
+            <td>{{ o.details or '—' }}</td>
+            <td>
+              {{ o.flavour or '—' }}
+              {% if o.custom_flavour_detail %}<br><span style="color:var(--gold);font-size:0.75rem">Custom: {{ o.custom_flavour_detail }}</span>{% endif %}
+              {% if o.custom_request %}<br><span style="color:var(--white-dim);font-size:0.75rem">Req: {{ o.custom_request }}</span>{% endif %}
+            </td>
+            <td>{{ o.event_date or '—' }}</td>
+            <td style="color:var(--gold);font-weight:600">
+              R{{ "%.2f"|format(o.total) }}
+              {% if o.discount_amount and o.discount_amount > 0 %}<br><span style="color:#7ee787;font-size:0.72rem;font-weight:400">🎉 {{ o.discount_pct|int }}% off (-R{{ "%.2f"|format(o.discount_amount) }})</span>{% endif %}
+              {% if o.birthday_voucher_used and o.birthday_voucher_used > 0 %}<br><span style="color:#7ee787;font-size:0.72rem;font-weight:400">🎂 -R{{ "%.2f"|format(o.birthday_voucher_used) }}</span>{% endif %}
+            </td>
+            <td>R{{ "%.2f"|format(o.deposit) }}</td>
+            <td>{% if o.is_rush %}<span style="color:#e07070">⚠️ YES</span>{% else %}No{% endif %}</td>
+            <td>{{ o.created_at[:10] }}</td>
+            <td>
+              <select onchange="updateStatus({{ o.id }}, this.value)" style="background:var(--black-soft);border:1px solid var(--border);color:var(--white);font-family:var(--font-ui);font-size:0.78rem;padding:0.4rem 0.6rem">
+                {% for s in ['Pending','Confirmed','In Progress','Ready','Completed','Cancelled'] %}
+                <option value="{{ s }}" {% if o.status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div style="text-align:center;padding:4rem;background:var(--black-card);border:1px solid var(--border)">
+        <p style="font-family:var(--font-ui);color:var(--white-dim)">No orders yet. Share your website and they'll start coming in! 🎂</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    async function updateStatus(orderId, newStatus) {
+      try {
+        const res = await fetch('/admin/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderId, status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Flash a quick visual confirmation
+          const cell = event.target.closest('td');
+          cell.style.background = 'rgba(46,160,67,0.2)';
+          setTimeout(() => cell.style.background = '', 800);
+        }
+      } catch(e) {
+        alert('Could not update status. Please try again.');
+      }
+    }
+
+    async function resetCustomerPassword() {
+      const email = document.getElementById('reset_email').value.trim();
+      const newPassword = document.getElementById('reset_new_password').value.trim();
+      const resultEl = document.getElementById('reset_result');
+
+      if (!email || !newPassword) {
+        resultEl.textContent = '⚠️ Please enter both an email and a new password.';
+        resultEl.style.color = '#e07070';
+        return;
+      }
+
+      try {
+        const res = await fetch('/admin/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, new_password: newPassword })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          resultEl.textContent = `✅ Password reset for ${data.name}! Send them their new password on WhatsApp now.`;
+          resultEl.style.color = '#7ee787';
+          document.getElementById('reset_email').value = '';
+          document.getElementById('reset_new_password').value = '';
+        } else {
+          resultEl.textContent = `⚠️ ${data.error}`;
+          resultEl.style.color = '#e07070';
+        }
+      } catch(e) {
+        resultEl.textContent = '⚠️ Something went wrong. Please try again.';
+        resultEl.style.color = '#e07070';
+      }
+    }
+  </script>
+</body>
+</html>

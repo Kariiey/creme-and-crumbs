@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ bakery_name }} — Artisan Cakes</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="/static/logo.PNG" type="image/PNG" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <img src="/static/logo.PNG" alt="{{ bakery_name }} logo" />
+      <span class="nav-logo-text">{{ bakery_name }}</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="/menu">Menu</a></li>
+      <li><a href="/order">Order</a></li>
+    </ul>
+    <div style="display:flex;gap:0.8rem;align-items:center">
+      <a href="/login" class="btn btn-outline nav-cta" style="padding:0.55rem 1.2rem">Log In</a>
+      <a href="/order" class="btn btn-gold nav-cta">Place Order</a>
+    </div>
+    <div class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Crème & Crumbs · Est. Where Elegance Meets Every Crumb</p>
+      <h1 class="hero-title">
+        Made with<br />Crème, <em>Baked with Love</em>
+      </h1>
+      <p class="hero-subtitle">Crafted Creations for Life’s Most Precious Moments</p>
+      <div class="hero-actions">
+        <a href="/menu" class="btn btn-gold">View Our Menu</a>
+        <a href="/order" class="btn btn-outline">Place an Order</a>
+        <a href="https://wa.me/{{ whatsapp }}" target="_blank" class="btn btn-whatsapp">
+          <!-- WhatsApp icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.563 4.14 1.544 5.876L.057 23.5l5.773-1.516A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.017-1.378l-.36-.214-3.427.9.916-3.347-.234-.375A9.818 9.818 0 1112 21.818z"/></svg>
+          WhatsApp Us
+        </a>
+      </div>
+    </div>
+    <div class="hero-scroll">Scroll</div>
+  </section>
+
+  <!-- ===== SOCIAL / CONTACT STRIP ===== -->
+  <div class="contact-strip">
+    <div class="container">
+      <a href="tel:{{ phone }}" class="contact-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+        {{ phone }}
+      </a>
+      <a href="https://wa.me/{{ whatsapp }}" target="_blank" class="contact-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.136.563 4.14 1.544 5.876L.057 23.5l5.773-1.516A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.017-1.378l-.36-.214-3.427.9.916-3.347-.234-.375A9.818 9.818 0 1112 21.818z"/></svg>
+        WhatsApp
+      </a>
+      <a href="{{ tiktok }}" target="_blank" class="contact-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.84 4.84 0 01-1.02-.09z"/></svg>
+        TikTok
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== FEATURED GALLERY ===== -->
+  <section class="section" style="padding-top:5rem;padding-bottom:0">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">Our Creations</span>
+        <h2 class="section-title">Featured Cakes</h2>
+        <div class="gold-rule"><span>✦</span></div>
+      </div>
+    </div>
+    <div class="gallery-grid reveal">
+      <div class="gallery-item">
+        <img src="/static/cake1.jpeg" alt="Elegant wedding cake" loading="lazy" />
+        <div class="gallery-caption">
+          <h3>The Elegant Ivory</h3>
+          <p>One-tier · Vanilla Rose</p>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <img src="/static/cake2.jpeg" alt="Chocolate celebration cake" loading="lazy" />
+        <div class="gallery-caption">
+          <h3>Skyline Adventure</h3>
+          <p>Two-tier · Chocolate</p>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <img src="/static/cake3.jpeg" alt="Red velvet birthday cake" loading="lazy" />
+        <div class="gallery-caption">
+          <h3>Red Velvet Dream</h3>
+          <p>Three-tier · Classic Layers</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BEST-SELLING FLAVOURS ===== -->
+  <section class="section flavours-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">The Classics</span>
+        <h2 class="section-title">Our Best-Selling Flavours</h2>
+        <div class="gold-rule"><span>✦</span></div>
+        <p style="font-family:var(--font-ui);color:var(--white-dim);font-size:0.9rem;max-width:480px;margin:0 auto">
+          Every flavour is crafted in-house with premium ingredients, delivering a taste that lingers long after the last bite.
+        </p>
+      </div>
+      <div class="flavours-grid">
+        {% set icons = ['🍦', '🍫', '🎂', '🍓'] %}
+        {% set descriptions = [
+          'Classic vanilla with a velvety crumb and delicate floral notes.',
+          'Rich chocolate layered with smooth ganache — deeply indulgent.',
+          'A Southern classic with a hint of cocoa and cream cheese frosting.',
+          'Sun-ripened strawberry with a light sponge and fresh berry cream.'
+        ] %}
+        {% for flavour in flavours %}
+        <div class="flavour-card reveal">
+          <div class="flavour-icon">{{ icons[loop.index0] }}</div>
+          <h3>{{ flavour }}</h3>
+          <p>{{ descriptions[loop.index0] }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      <div style="text-align:center;margin-top:3rem" class="reveal">
+        <a href="/menu" class="btn btn-gold">View Full Menu</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BAND ===== -->
+  <section class="section-sm" style="background:var(--black-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="container" style="text-align:center">
+      <div class="reveal">
+        <span class="section-eyebrow">Ready to Celebrate?</span>
+        <h2 style="font-size:clamp(1.8rem,4vw,2.8rem);color:var(--white);margin-bottom:1rem">Let's Create Something Beautiful Together</h2>
+        <p style="font-family:var(--font-ui);color:var(--white-dim);font-size:0.9rem;max-width:420px;margin:0 auto 2rem">
+          Every order is handcrafted to perfection. Place your order at least 14 days in advance for the best experience.
+        </p>
+        <a href="/order" class="btn btn-gold">Start Your Order</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">
+            <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+            <span class="nav-logo-text">{{ bakery_name }}</span>
+          </div>
+          <p>Cakes crafted with love, elevated with luxury, and finished with care.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/menu">Our Menu</a></li>
+            <li><a href="/order">Place Order</a></li>
+            <li><a href="/terms">Terms &amp; Conditions</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="https://wa.me/{{ whatsapp }}" target="_blank">WhatsApp</a></li>
+            <li><a href="{{ tiktok }}" target="_blank">TikTok</a></li>
+            <li><a href="tel:{{ phone }}">{{ phone }}</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 <span class="gold-accent">{{ bakery_name }}</span>. All rights reserved.</span>
+        <span>Crafted with <span class="gold-accent">♥</span> for special moments.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Hero background load
+    const bg = document.getElementById('heroBg');
+    const img = new Image();
+    img.onload = () => bg.classList.add('loaded');
+    img.src = '/static/background.jpeg';
+    bg.style.backgroundImage = `url('/static/background.jpeg')`;
+
+    // Hamburger menu
+    const ham = document.getElementById('hamburger');
+    const links = document.getElementById('navLinks');
+    ham.addEventListener('click', () => links.classList.toggle('open'));
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+        <div class="auth-logo-name">{{ bakery_name }}</div>
+      </div>
+      <h1 class="auth-title">Admin Access</h1>
+      <p class="auth-subtitle">For bakery owner use only</p>
+      <form method="POST" action="/admin">
+        <div class="form-group">
+          <label for="admin_pass">Admin Password</label>
+          <input type="password" id="admin_pass" name="admin_pass" placeholder="Enter admin password" required />
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:1.1rem">
+          Access Admin Panel
+        </button>
+      </form>
+      <div class="auth-footer" style="margin-top:1rem"><a href="/">← Back to Home</a></div>
+    </div>
+  </div>
+</body>
+</html>

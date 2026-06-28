@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Log In — {{ bakery_name }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/static/logo.PNG" alt="{{ bakery_name }}" />
+        <div class="auth-logo-name">{{ bakery_name }}</div>
+      </div>
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Log in to view and track your orders</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Your password" required />
+          <small style="font-family:var(--font-ui);font-size:0.78rem;margin-top:0.5rem;display:block;text-align:right">
+            <a href="/forgot-password">Forgot your password?</a>
+          </small>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:1.1rem;margin-top:0.5rem">
+          Log In
+        </button>
+      </form>
+
+      <div class="auth-footer" style="margin-top:1rem">
+        Don't have an account? <a href="/signup">Sign up here</a>
+      </div>
+      <div class="auth-footer" style="margin-top:0.5rem">
+        <a href="/">← Back to Home</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
