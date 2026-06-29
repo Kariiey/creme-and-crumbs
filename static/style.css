@@ -643,3 +643,12 @@ footer {
   color: var(--gold-light);
   font-weight: 600;
 }
+
+/* FLAVOUR CHECKBOXES (multi-select, max 3) */
+.flavour-checkbox-group { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+.flavour-checkbox { display: flex; align-items: center; gap: 0.5rem; background: var(--black-soft); border: 1px solid var(--border); padding: 0.6rem 1rem; cursor: pointer; font-family: var(--font-ui); font-size: 0.82rem; color: var(--white-dim); transition: all var(--transition); border-radius: var(--radius); }
+.flavour-checkbox:hover { border-color: var(--border-hover); }
+.flavour-checkbox input[type="checkbox"] { accent-color: var(--gold); width: 15px; height: 15px; cursor: pointer; }
+.flavour-checkbox input[type="checkbox"]:checked + span { color: var(--gold-light); }
+.flavour-checkbox.disabled { opacity: 0.35; cursor: not-allowed; }
+.flavour-checkbox.disabled input[type="checkbox"] { cursor: not-allowed; }

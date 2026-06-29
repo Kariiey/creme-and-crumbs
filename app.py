@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from datetime import datetime, date
-import sqlite3, hashlib, secrets, os, base64
+import sqlite3, hashlib, secrets, os, base64, threading
 
 app = Flask(__name__)
 
@@ -295,16 +295,20 @@ def calculate_price(product, options, user=None, db=None):
         too_soon = True
 
     if product == "cake_in_cup":
-        qty   = int(options.get("quantity", 1))
-        price = CAKE_IN_CUP_PRICE * qty
-        if options.get("flavour") == "Custom":
-            custom_flavour_fee = CAKE_IN_CUP_CUSTOM_FLAVOUR_FEE * qty
+        qty       = int(options.get("quantity", 1))
+        flavours  = options.get("flavours", []) or []
+        price     = CAKE_IN_CUP_PRICE * qty
+        custom_count = flavours.count("Custom")
+        if custom_count:
+            custom_flavour_fee = CAKE_IN_CUP_CUSTOM_FLAVOUR_FEE * qty * custom_count
 
     elif product == "cupcakes":
-        qty   = int(options.get("quantity", 6))
-        price = CUPCAKE_PRICES.get(qty, CUPCAKE_PRICES[6])
-        if options.get("flavour") == "Custom":
-            custom_flavour_fee = CUPCAKE_CUSTOM_FLAVOUR_FEE
+        qty       = int(options.get("quantity", 6))
+        flavours  = options.get("flavours", []) or []
+        price     = CUPCAKE_PRICES.get(qty, CUPCAKE_PRICES[6])
+        custom_count = flavours.count("Custom")
+        if custom_count:
+            custom_flavour_fee = CUPCAKE_CUSTOM_FLAVOUR_FEE * custom_count
 
     elif product == "cake":
         tiers  = int(options.get("tiers", 1))
@@ -327,8 +331,13 @@ def calculate_price(product, options, user=None, db=None):
         if layers > DEFAULT_MAX_LAYERS:
             extra_layer_fee = (layers - DEFAULT_MAX_LAYERS) * EXTRA_LAYER_FEE
 
-        if options.get("flavour") == "Custom":
-            custom_flavour_fee = CAKE_CUSTOM_FLAVOUR_FEE
+        # Each tier has its own flavour list — "Custom" in any tier adds a fee for that tier
+        flavours_tier1 = options.get("flavours_tier1", []) or []
+        flavours_tier2 = options.get("flavours_tier2", []) or []
+        flavours_tier3 = options.get("flavours_tier3", []) or []
+        custom_count = flavours_tier1.count("Custom") + flavours_tier2.count("Custom") + flavours_tier3.count("Custom")
+        if custom_count:
+            custom_flavour_fee = CAKE_CUSTOM_FLAVOUR_FEE * custom_count
 
     elif product == "scones":
         scone_type = options.get("scone_type", "")
@@ -447,7 +456,7 @@ def send_order_email(order_data, user):
             except Exception as img_err:
                 print(f"Image attach error: {img_err}")
 
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as s:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=15) as s:
             s.ehlo()
             s.starttls()
             s.ehlo()
@@ -632,6 +641,40 @@ def calculate():
     return jsonify(result)
 
 
+def format_flavour_text(data):
+    """Builds a readable flavour summary string depending on the product type,
+    since cake_in_cup/cupcakes use a single flavour list, but cakes have
+    a separate flavour list per tier."""
+    product = data.get("product")
+
+    if product == "cake":
+        parts = []
+        for i, key in enumerate(["flavours_tier1", "flavours_tier2", "flavours_tier3"], start=1):
+            flavours = data.get(key) or []
+            if flavours:
+                parts.append(f"Tier {i}: {', '.join(flavours)}")
+        return " | ".join(parts) if parts else "N/A"
+    else:
+        flavours = data.get("flavours") or []
+        return ", ".join(flavours) if flavours else "N/A"
+
+
+def format_custom_flavour_detail(data):
+    """Builds a readable custom-flavour description string, since cakes can have
+    a different custom flavour description per tier."""
+    product = data.get("product")
+
+    if product == "cake":
+        parts = []
+        for i, key in enumerate(["custom_flavour_detail_tier1", "custom_flavour_detail_tier2", "custom_flavour_detail_tier3"], start=1):
+            detail = (data.get(key) or "").strip()
+            if detail:
+                parts.append(f"Tier {i}: {detail}")
+        return " | ".join(parts) if parts else ""
+    else:
+        return (data.get("custom_flavour_detail") or "").strip()
+
+
 @app.route("/submit-order", methods=["POST"])
 @login_required
 def submit_order():
@@ -640,7 +683,9 @@ def submit_order():
     with get_db() as db:
         p = calculate_price(data.get("product"), data, user=user, db=db)
 
-    details = data.get("details", "")
+    details        = data.get("details", "")
+    flavour_text    = format_flavour_text(data)
+    custom_flavour_text = format_custom_flavour_detail(data)
 
     with get_db() as db:
         db.execute("""
@@ -652,7 +697,7 @@ def submit_order():
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             user["id"], data.get("product"), details,
-            data.get("flavour"), data.get("custom_flavour_detail",""),
+            flavour_text, custom_flavour_text,
             data.get("custom_request",""), data.get("event_date"),
             p["base_price"], p["rush_fee"], p["extra_layer_fee"],
             p["custom_flavour_fee"], p["discount_pct"], p["discount_amount"],
@@ -661,7 +706,14 @@ def submit_order():
         ))
 
     order_data = {**data, **p}
-    send_order_email(order_data, user)
+    order_data["flavour"] = flavour_text
+    order_data["custom_flavour_detail"] = custom_flavour_text
+
+    # Send the email in the background so a slow/unreachable mail server
+    # never delays or breaks the order confirmation the customer sees.
+    email_thread = threading.Thread(target=send_order_email, args=(order_data, user))
+    email_thread.daemon = True
+    email_thread.start()
 
     discount_line = ""
     if p["discount_pct"] > 0:
@@ -675,8 +727,8 @@ def submit_order():
         f"*Phone:* {user['phone']}\n"
         f"*Email:* {user['email']}\n"
         f"*Product:* {data.get('product')}\n"
-        f"*Flavour:* {data.get('flavour','N/A')}\n"
-        f"*Custom Flavour:* {data.get('custom_flavour_detail','N/A')}\n"
+        f"*Flavour(s):* {flavour_text}\n"
+        f"*Custom Flavour:* {custom_flavour_text or 'N/A'}\n"
         f"*Details:* {details}\n"
         f"*Event Date:* {data.get('event_date')}\n"
         f"*Custom Request:* {data.get('custom_request','None')}\n\n"
