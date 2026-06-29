@@ -1,11 +1,7 @@
 from flask import (Flask, render_template, request, jsonify,
                    session, redirect, url_for, flash)
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage
 from datetime import datetime, date
-import sqlite3, hashlib, secrets, os, base64, threading
+import sqlite3, hashlib, secrets, os, base64
 
 app = Flask(__name__)
 
@@ -28,13 +24,6 @@ BANK_NAME           = "Capitec Bank"
 BANK_ACCOUNT_NUMBER = "2231580892"
 BANK_ACCOUNT_HOLDER = "Créme & Crumbs"
 
-# --- Email Notification Settings (iCloud) ---
-SMTP_SERVER   = "smtp.mail.me.com"
-SMTP_PORT     = 587
-SMTP_USERNAME = "creme.crumbs@icloud.com"
-SMTP_PASSWORD = "mxoe-luki-fvsc-pbjf"      # ✏️ Your Apple App-Specific Password
-NOTIFY_EMAIL  = "creme.crumbs@icloud.com"
-
 # --- Standard Flavours ---
 FLAVOURS = ["Vanilla", "Chocolate", "Red Velvet", "Strawberry"]
 
@@ -50,7 +39,7 @@ CAKE_IN_CUP_PRICE = 45
 CUPCAKE_PRICES = {6: 120, 12: 220, 24: 420, 48: 800}
 
 # --- Cake Prices ---
-ONE_TIER_PRICES   = {18:680, 20:780, 22:880, 24:980, 26:1100, 28:1200}
+ONE_TIER_PRICES   = {18:580, 20:680, 22:780, 24:880, 26:990, 28:1200}
 TWO_TIER_PRICES   = {18:1100,20:1300,22:1500,24:1700,26:1900,28:2200}
 THREE_TIER_PRICES = {18:1800,20:2100,22:2400,24:2700,26:3000,28:3500}
 
@@ -105,7 +94,7 @@ ASSORTED_SCONES_PRICES = {
     "25 Litre": 1300,
 }
 ASSORTED_BOX_PRICE       = 290   # Includes 8 Muffins, 4 Scones, 10 Biscuits
-ASSORTED_BOX_CONTENTS    = ["8 Muffins", "8 Scones", "10 Biscuits"]
+ASSORTED_BOX_CONTENTS    = ["8 Muffins", "4 Scones", "10 Biscuits"]
 
 # =============================================================================
 # END OF EDITABLE CONFIGURATION
@@ -385,88 +374,6 @@ def calculate_price(product, options, user=None, db=None):
                 is_rush=rush, too_soon=too_soon)
 
 
-# ── Email helper ──────────────────────────────────────────────────────────────
-
-def send_order_email(order_data, user):
-    """Send order notification email to bakery owner via iCloud SMTP."""
-    try:
-        msg = MIMEMultipart("mixed")
-        msg["Subject"] = f"🎂 New Order from {user['name']}"
-        msg["From"]    = SMTP_USERNAME
-        msg["To"]      = NOTIFY_EMAIL
-
-        inspiration_html = ""
-        if order_data.get("inspiration_image"):
-            inspiration_html = """
-            <tr><td colspan="2" style="padding:8px;font-weight:bold;color:#555">Inspiration Image</td></tr>
-            <tr><td colspan="2" style="padding:8px">
-              <img src="cid:inspiration_image" style="max-width:400px;border:2px solid #C9A84C" alt="Inspiration" />
-            </td></tr>"""
-
-        discount_html = ""
-        if order_data.get("discount_pct", 0) > 0:
-            discount_html = f'<p style="margin:5px 0">🎉 Loyalty Discount ({order_data["discount_pct"]:.0f}%): -R{order_data.get("discount_amount",0):.2f}</p>'
-        if order_data.get("birthday_voucher_used", 0) > 0:
-            discount_html += f'<p style="margin:5px 0">🎂 Birthday Voucher: -R{order_data.get("birthday_voucher_used",0):.2f}</p>'
-
-        html = f"""
-        <html><body style="font-family:Arial,sans-serif;background:#f9f9f9;padding:20px">
-        <div style="max-width:620px;margin:auto;background:#fff;border:2px solid #C9A84C;border-radius:8px;padding:30px">
-          <h2 style="color:#1a1a1a;border-bottom:2px solid #C9A84C;padding-bottom:10px">
-            🎂 New Order — {BAKERY_NAME}
-          </h2>
-          <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:8px;font-weight:bold;color:#555;width:160px">Customer</td><td style="padding:8px">{user["name"]}</td></tr>
-            <tr style="background:#fafafa"><td style="padding:8px;font-weight:bold;color:#555">Email</td><td style="padding:8px">{user["email"]}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;color:#555">Phone</td><td style="padding:8px">{user["phone"]}</td></tr>
-            <tr style="background:#fafafa"><td style="padding:8px;font-weight:bold;color:#555">Product</td><td style="padding:8px">{order_data.get("product","")}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;color:#555">Details</td><td style="padding:8px">{order_data.get("details","")}</td></tr>
-            <tr style="background:#fafafa"><td style="padding:8px;font-weight:bold;color:#555">Flavour</td><td style="padding:8px">{order_data.get("flavour","")}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;color:#555">Custom Flavour</td><td style="padding:8px">{order_data.get("custom_flavour_detail","N/A")}</td></tr>
-            <tr style="background:#fafafa"><td style="padding:8px;font-weight:bold;color:#555">Event Date</td><td style="padding:8px">{order_data.get("event_date","")}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;color:#555">Custom Request</td><td style="padding:8px">{order_data.get("custom_request","None")}</td></tr>
-            <tr style="background:#fafafa"><td style="padding:8px;font-weight:bold;color:#555">Rush Order</td><td style="padding:8px">{"⚠️ YES" if order_data.get("is_rush") else "No"}</td></tr>
-            {inspiration_html}
-          </table>
-          <div style="background:#1a1a1a;color:#C9A84C;padding:20px;border-radius:6px;margin-top:20px;text-align:center">
-            <p style="margin:5px 0;font-size:14px">Rush Fee: R{order_data.get("rush_fee",0):.2f}</p>
-            <p style="margin:5px 0;font-size:14px">Custom Flavour Fee: R{order_data.get("custom_flavour_fee",0):.2f}</p>
-            {discount_html}
-            <p style="margin:5px 0;font-size:22px;font-weight:bold">Total: R{order_data.get("total",0):.2f}</p>
-            <p style="margin:5px 0;font-size:16px">50% Deposit Due: R{order_data.get("deposit",0):.2f}</p>
-          </div>
-          <div style="margin-top:20px;padding:15px;background:#f9f4e8;border:1px solid #C9A84C;border-radius:4px">
-            <strong style="color:#9A7A2E">Payment Details</strong><br>
-            {BANK_NAME} · Acc: {BANK_ACCOUNT_NUMBER} · Name: {BANK_ACCOUNT_HOLDER}
-          </div>
-        </div></body></html>"""
-
-        alt_part = MIMEMultipart("alternative")
-        alt_part.attach(MIMEText(html, "html"))
-        msg.attach(alt_part)
-
-        if order_data.get("inspiration_image"):
-            try:
-                header, encoded = order_data["inspiration_image"].split(",", 1)
-                img_data = base64.b64decode(encoded)
-                img_part = MIMEImage(img_data)
-                img_part.add_header("Content-ID", "<inspiration_image>")
-                img_part.add_header("Content-Disposition", "inline", filename="inspiration.jpg")
-                msg.attach(img_part)
-            except Exception as img_err:
-                print(f"Image attach error: {img_err}")
-
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=15) as s:
-            s.ehlo()
-            s.starttls()
-            s.ehlo()
-            s.login(SMTP_USERNAME, SMTP_PASSWORD)
-            s.sendmail(SMTP_USERNAME, NOTIFY_EMAIL, msg.as_string())
-        return True
-    except Exception as e:
-        print(f"Email error: {e}")
-        return False
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # ROUTES
@@ -708,12 +615,9 @@ def submit_order():
     order_data = {**data, **p}
     order_data["flavour"] = flavour_text
     order_data["custom_flavour_detail"] = custom_flavour_text
-
-    # Send the email in the background so a slow/unreachable mail server
-    # never delays or breaks the order confirmation the customer sees.
-    email_thread = threading.Thread(target=send_order_email, args=(order_data, user))
-    email_thread.daemon = True
-    email_thread.start()
+    # Email notifications removed — Render's free tier can't reliably reach
+    # iCloud's mail servers. Order notifications now go through WhatsApp instead
+    # (see owner_wa_link below), and every order is always visible in /admin.
 
     discount_line = ""
     if p["discount_pct"] > 0:
